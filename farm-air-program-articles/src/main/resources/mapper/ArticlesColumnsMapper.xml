@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.articles.mapper.ArticlesColumnsMapper">
+
+
+<!--    boolean saveArticleColumnsShare(@Param("columnsId") String ArticleId, @Param("articles") List<Articles> articles);-->
+    <insert id="saveArticleColumnsShare" parameterType="map">
+        insert into articles_columns_share(columns_id,articles_id,articles_title)
+        values
+        <foreach collection="articles" item="article" separator=",">
+            (#{columnsId}, #{article.id}, #{article.title})
+        </foreach>
+    </insert>
+<!--    boolean deleteArticleColumnsShare(@Param("columnsId") String columnsId);-->
+    <delete id="deleteArticleColumnsShare" parameterType="String">
+        delete from articles_columns_share where columns_id = #{columnsId}
+    </delete>
+
+<!--    List<ArticlesColumns> getColumnsByCategoryId(@Param("categoryId") Integer categoryId, @Param("status") Integer status);-->
+    <select id="getColumnsByCategoryId" parameterType="map" >
+        select
+        ac.id,
+        ac.category_id,
+        ac.category_name,
+        ac.user_id,
+        ac.username,
+        ac.avatar_url,
+        ac.title,
+        ac.summary,
+        ac.cover,
+        ac.post_time,
+        ac.last_update_time,
+        ac.read_count,
+        ac.collection_count,
+        ac.status
+        from articles_columns ac
+        where ac.category_id = #{categoryId} and ac.status = #{status}
+    </select>
+
+<!--    List<Articles> getColumnsSearchByColumnsId(@Param("columnsId") String columnsId);-->
+    <select id="getArticleSearchByColumnsId" parameterType="String">
+        select ac.articles_id as id,ac.articles_title as title
+        from articles_columns_share as ac
+        where columns_id = #{columnsId}
+    </select>
+
+</mapper>

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.articles.mapper.ArticlesCommentsMapper">
+
+    <!-- 定义 resultMap 来映射查询结果 -->
+    <resultMap id="ArticlesCommentsResultMap" type="com.example.articles.vo.ArticlesCommentsReqVO">
+        <result property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="articleId" column="article_id"/>
+        <result property="commentText" column="comment_text"/>
+        <result property="createTime" column="create_time"/>
+        <result property="userId" column="user_id"/>
+        <result property="receiverId" column="receiver_id"/>
+        <result property="username" column="username"/>
+        <result property="avatarUrl" column="avatar_url"/>
+        <result property="receiverUsername" column="receiver_username"/>
+        <result property="receiverAvatarUrl" column="receiver_avatar_url"/>
+    </resultMap>
+
+    <!-- 使用上述 resultMap 进行查询 -->
+    <select id="getArticlesByArticleId" resultMap="ArticlesCommentsResultMap"  >
+        SELECT
+            ac.id AS id,
+            ac.parent_id AS parent_id,
+            ac.article_id AS article_id,
+            ac.comment_text AS comment_text,
+            ac.create_time AS create_time,
+            ac.user_id AS user_id,
+            ac.receiver_id AS receiver_id,
+            u1.username AS username,
+            u1.avatar_url AS avatar_url,
+            u2.username AS receiver_username,
+            u2.avatar_url AS receiver_avatar_url
+        FROM
+            articles_comments ac
+                LEFT JOIN
+            users u1 ON ac.user_id = u1.user_id
+                LEFT JOIN
+            users u2 ON ac.receiver_id = u2.user_id
+        WHERE
+            ac.article_id = #{articleId}
+    </select>
+
+
+    <select id="getOne" parameterType="com.example.articles.entity.ArticlesComments"  >
+        SELECT
+            *
+        FROM
+            articles_comments
+        WHERE
+            id=#{id}
+    </select>
+</mapper>
