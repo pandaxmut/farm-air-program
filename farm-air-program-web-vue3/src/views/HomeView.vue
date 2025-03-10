@@ -51,6 +51,22 @@ setTimeout(() => {
 
 const drawer = ref(false)
 
+import { useSearchStore } from '@/stores/searchStore';
+const searchStore = useSearchStore();
+
+const keyword = computed({
+  get: () => searchStore.keyword,
+  set: (val) => searchStore.setKeyword(val),
+});
+const searchResource = async () => {
+  console.log("keyword", keyword)
+  if (!keyword.value) {
+    return;
+  }
+  router.push({ path: '/knowledge', query: { keyword: keyword.value } });
+}
+
+
 </script>
 
 
@@ -76,9 +92,9 @@ const drawer = ref(false)
       <el-menu-item index="1">
         <RouterLink to="/subject">专栏</RouterLink>
       </el-menu-item>
-      <el-menu-item index="2">
-        <RouterLink to="/knowledge">知识库</RouterLink>
-      </el-menu-item>
+<!--      <el-menu-item index="2">-->
+<!--        <RouterLink to="/knowledge">知识库</RouterLink>-->
+<!--      </el-menu-item>-->
       <el-menu-item index="3">
         <RouterLink to="/question">问答区</RouterLink>
       </el-menu-item>
@@ -97,14 +113,26 @@ const drawer = ref(false)
       <div class="right-menu" >
 
         <el-menu-item index="7" style="padding: 5px;">
-        
+          <div style="display: flex">
+            <el-input
+                v-model="keyword"
+                placeholder="请输入关键词"
+
+            >
+            </el-input>
+            <el-button   type="danger" plain @click="searchResource" > 搜索 </el-button>
+          </div>
+        </el-menu-item>
+
+
+        <el-menu-item index="8" style="padding: 5px;">
           <el-dropdown placement="top-end"  >
             <el-button type="primary" plain>创作</el-button>
             <!-- 下拉菜单内容 -->
             <template #dropdown>
               <el-dropdown-menu>
                 <el-dropdown-item>
-                  
+
                   <RouterLink to="/articles/create">
                     创作文章
                   </RouterLink>
@@ -114,13 +142,19 @@ const drawer = ref(false)
                     发布问答
                   </RouterLink>
                 </el-dropdown-item>
+                <el-dropdown-item v-if="userStore.getUser.role == 2">
+                  <RouterLink to="/mall/create">
+                    上传商品
+                  </RouterLink>
+                </el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
         </el-menu-item>
-        
 
-        <el-menu-item index="8" style="padding: 10px;">
+
+
+        <el-menu-item index="9" style="padding: 10px;">
           <!-- 使用 el-dropdown 包裹消息图标 -->
           <el-dropdown placement="top-end" class="message-link" trigger="hover">
             <!-- 图标和红点的容器，设置为相对定位 -->
@@ -153,16 +187,16 @@ const drawer = ref(false)
           <el-button type="primary" plain style="margin-right: 2px;" @click="login">登录</el-button>
         </el-menu-item>
 
-        <el-sub-menu index="9">
+        <el-sub-menu index="11">
           <template #title>我的工作台</template>
-          <el-menu-item index="9-1">
+          <el-menu-item index="11-1">
             <a  @click="drawer = true">
               个人中心
             </a>
           </el-menu-item>
-          <el-menu-item index="9-2">修改密码</el-menu-item>
-          <el-menu-item index="9-3">系统通知</el-menu-item>
-          <el-menu-item index="9-4"   @click="logout">
+          <el-menu-item index="11-2">修改密码</el-menu-item>
+          <el-menu-item index="11-3">系统通知</el-menu-item>
+          <el-menu-item index="11-4"   @click="logout">
             登出
           </el-menu-item>
 

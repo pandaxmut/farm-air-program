@@ -1,6 +1,6 @@
 package com.example.common.socket;
 
-import lombok.var;
+
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

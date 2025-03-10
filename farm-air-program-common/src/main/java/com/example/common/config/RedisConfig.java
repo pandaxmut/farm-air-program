@@ -1,39 +1,52 @@
 package com.example.common.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-@EnableCaching   //开启缓存功能，作用于缓存配置类上或者作用于springboot启动类上
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@EnableCaching
 @Configuration
 public class RedisConfig {
 
-    /**
-     * 1.创建redisTemplate实例，用来操作redis数据库
-     * 2.序列化
-     */
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        //加载连接工厂
         redisTemplate.setConnectionFactory(redisConnectionFactory);
 
-        //TODO 可优化点 （自定义序列化器和jackson2） 我们这里没有引用jackson2 的jar包，所以这里使用jdk的序列化器
-        //设置key的序列化器
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        //设置value的序列化器
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        // 配置 ObjectMapper
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        javaTimeModule.addSerializer(LocalDateTime.class,
+                new com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer(
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                )
+        );
+        objectMapper.registerModule(javaTimeModule);
 
-        //设置hash的key序列化器
-        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        //设置hash的value序列化器
-        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 
+        // key 和 hash key 都用字符串
+        redisTemplate.setKeySerializer(StringRedisSerializer.UTF_8);
+        redisTemplate.setHashKeySerializer(StringRedisSerializer.UTF_8);
+
+        // value 和 hash value 用 JSON 序列化
+        redisTemplate.setValueSerializer(serializer);
+        redisTemplate.setHashValueSerializer(serializer);
 
         return redisTemplate;
-
     }
 }

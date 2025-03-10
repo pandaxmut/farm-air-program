@@ -57,17 +57,19 @@
         </div>
     </el-row>
   </div>
-  
 
     <div v-for="(article, index) in articles">
       <div class="container">
         <h2>
-          <a @click.prevent="goToArticleDetail(article.id)" >{{ article.title }}</a>
+<!--          v-html="article.highlightTitle"-->
+          <a @click.prevent="goToArticleDetail(article.id)"   >
+            {{article.title}}
+          </a>
       </h2>
       <el-row class="tag-container" >
         <el-col :span="18" >
           <el-text line-clamp="3" >
-            {{ article.content }}  
+            {{ article.content}}
           </el-text>
         </el-col>
         <!-- 文章图片 -->
@@ -104,15 +106,7 @@
                 <img src="@/assets/images/时间.svg" style="width: 1.5em; height: 1.5em; margin-top: 2px;"/>
                 <span> {{ article.postTime }}</span>
               </li>
-<!--              <li class="like" style="margin-top: 8px; margin-left: 3px; " >-->
-<!--                <Star @click="toggleFavorite" :style="{ width: '1.5em', height: '1.5em', marginTop: '2px',  cursor: 'pointer', color: favorite ? 'red' : 'gray'  }" />-->
-<!--                <span>{{ favoriteCount }}收藏</span>-->
-<!--              </li>-->
-<!--              <li class="like" style="margin-top: 8px; margin-left: 3px; ">-->
-<!--                <img :src="zan ? zanTypes[1] : zanTypes[0]" @click="toggleZan(index,article.id)" style=" width: 1.5em; height: 1.5em; margin-Top: 2px; cursor: pointer; "/>-->
-<!--              -->
-<!--                <span> {{ article.goodCount}}点赞</span>-->
-<!--              </li>-->
+
               <li class="like" style="margin-top: 8px; margin-left: 3px; " >
                 <Star @click="toggleFavorite" :style="{ width: '1.5em', height: '1.5em', marginTop: '2px',  cursor: 'pointer', color: favorite ? 'red' : 'gray'  }" />
                 <span>{{ article.collectionCount }}收藏</span>
@@ -138,13 +132,11 @@
 <script setup lang="ts">
   import { ref, onMounted } from "vue";
   import {useRouter} from "vue-router";
-
   import {getArticles, likeArticle} from "@/api/articles";
   import type { Article } from "@/api/articles";
   import { ar } from "element-plus/es/locales.mjs";
 
   const router = useRouter();
-
 
   const favoriteCount = ref(1);
   const favorite = ref(false);
@@ -274,5 +266,10 @@
   :hover {
     transform: translateY(3px);
   }
+}
+::v-deep .em {
+  color: #fb7a75;
+  font-size: 20px;
+  font-weight: bold;
 }
 </style>

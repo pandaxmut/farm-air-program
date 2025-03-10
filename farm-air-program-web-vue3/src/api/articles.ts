@@ -1,7 +1,7 @@
 // 使用axios发送请求
 import axios from "axios";
 import request from "@/api/utils/request";
-import {reactive} from "vue";
+
 
 
 // articleReqVo实体类
@@ -34,6 +34,8 @@ export interface Article {
     status: number;
     good: boolean;
     collection: boolean;
+    highlightTitle: string;
+    highlightContent: string;
 }
 
 
@@ -132,7 +134,7 @@ export async function likeArticle(article: Article) {
     }
   }
 
-
+//普通搜索
 export async function getSearchArticle(articleName:string, articleType:number){
     try{
         const response = await request.get(`/api/articles/articles/search`, {
@@ -148,6 +150,24 @@ export async function getSearchArticle(articleName:string, articleType:number){
         throw error;
     }
 }
+//es搜索 关键词
+export async function getSearchArticles(keyword:string, page:number = 1, size:number = 5) {
+    try{
+        const response = await request.get(`/api/articles/articles/search/es`, {
+            params: {
+                keyword: keyword,
+                page: page,
+                size: size
+            }
+        });
+        console.log('articles fetched successfully:', response.data.data);
+        return response.data.data;
+    }catch (error){
+        console.error('Error fetching articles:', error);
+        throw error;
+    }
+}
+
 
 export async function createArticleColumns(articlesColumns:ArticleColumns){
     try{

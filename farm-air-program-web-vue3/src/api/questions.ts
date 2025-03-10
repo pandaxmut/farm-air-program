@@ -17,6 +17,10 @@ interface Question {
     commentCount: number;
     topType: number;
     status: number;
+    highlightTitle: string;
+    highlightContent: string;
+    highlightAiAnswer: string;
+
 }
 
 //新增问答
@@ -44,6 +48,25 @@ export async function getQuestions() {
         throw error;
     }
 }
+//es搜索
+export async function getSearchQuestions(keyword:string, page:number = 1, size:number = 5) {
+    try{
+        const response = await request.get(`/api/questions/questions/search`, {
+            params: {
+                keyword: keyword,
+                page: page,
+                size: size
+            }
+        })
+        console.log('question fetched successfully:', response.data.data);
+        return response.data.data;
+    }catch (error){
+        console.error('Error fetching question:', error);
+        throw error;
+    }
+}
+
+
 
 //某一篇文章
 export async function getQuestionById(id: String) {

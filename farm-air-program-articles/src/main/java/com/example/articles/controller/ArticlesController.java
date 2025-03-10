@@ -6,21 +6,24 @@ import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.example.articles.dto.ArticlesEsDTO;
 import com.example.articles.entity.Articles;
 import com.example.articles.entity.ArticlesLike;
 import com.example.articles.entity.ArticlesTags;
-import com.example.articles.mapper.ArticlesTagsMapper;
+import com.example.articles.service.ArticlesSearchService;
 import com.example.articles.service.IArticlesLikeService;
 import com.example.articles.service.IArticlesService;
 import com.example.articles.service.IArticlesTagsService;
 import com.example.articles.vo.ArticlesReqVO;
+import com.example.articles.vo.ArticlesSearchRespVO;
 import com.example.common.utils.CommonResult;
 import com.example.common.utils.UserContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.stereotype.Controller;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -41,8 +44,11 @@ public class ArticlesController {
     private IArticlesTagsService articlesTagsService;
     @Resource
     private IArticlesLikeService articlesLikeService;
+    @Resource
+    private ArticlesSearchService articlesSearchService;
 
     //创建文章
+    @Transactional
     @PostMapping()
     public CommonResult<Articles> createArticles(@RequestBody ArticlesReqVO articlesReqVO) {
         log.info("createArticles");
@@ -50,11 +56,12 @@ public class ArticlesController {
         articlesReqVO.setUserId(UserContext.getUserId());
         log.info("tags:{}",articlesReqVO.getTags().size());
         //保存信息z
+        Snowflake snowflake = IdUtil.getSnowflake(0, 0);//这里表示，在数据中心1中的第一台机器；
+        articlesReqVO.setId(snowflake.nextIdStr());
+
         Articles articles = new Articles();
         BeanUtil.copyProperties(articlesReqVO, articles);
 
-        Snowflake snowflake = IdUtil.getSnowflake(0, 0);//这里表示，在数据中心1中的第一台机器；
-        articles.setId(snowflake.nextIdStr());
         log.info("articles:{}", articles);
         articlesService.save(articles);
         //判断是否新增标签，新增则保存 TODO:将遍历插入数据信息进行优化？一次性插入？
@@ -66,12 +73,22 @@ public class ArticlesController {
                 articlesTagsService.save(articlesTags);
             }
         }
+        //es 保存
+        ArticlesEsDTO articlesEsDTO = new ArticlesEsDTO();
+        BeanUtil.copyProperties(articlesReqVO,articlesEsDTO);
+        try {
+            articlesService.saveOrUpdateArticleToEs(articlesEsDTO);
+            log.info("es数据保存成功！");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         return CommonResult.success(articlesReqVO);
     }
 
     //获取用户文章列表
     @GetMapping()
-    public CommonResult<List<ArticlesReqVO>> getUserArticles() {
+    public CommonResult<List<ArticlesReqVO>> getUserArticles() throws IOException {
         log.info("getUserArticles");
         log.info("getuserinfo:{}", UserContext.getUserId());
         //1.获取文章信息列表
@@ -100,6 +117,7 @@ public class ArticlesController {
 
         log.info("完整的文章信息列表：targetList:{}", targetList);
         return CommonResult.success(targetList);
+//        return articlesSearchService.searchArticles("redis", 1, 10);
     }
 
     //获取指定文章
@@ -144,8 +162,20 @@ public class ArticlesController {
         wrapper.like(Articles::getTitle, articleName);
         wrapper.eq(Articles::getStatus, status);
         wrapper.orderByDesc(Articles::getPostTime);
-        return CommonResult.success(articlesService.list(wrapper));
+        List<Articles> list = articlesService.list(wrapper);
+
+        return CommonResult.success(list);
     }
 
 
+
+    //es搜索
+    @GetMapping("/search/es")
+    public CommonResult<List<ArticlesSearchRespVO>>  search(@RequestParam("keyword") String keyword,
+                                                            @RequestParam("page") Integer page,
+                                                            @RequestParam("size") Integer size) throws IOException {
+        CommonResult<List<ArticlesSearchRespVO>> listCommonResult = articlesSearchService.searchArticles(keyword, page, size);
+        return listCommonResult;
+
+    }
 }

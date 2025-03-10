@@ -23,6 +23,18 @@
                 <span style="padding-left: 5px" >待回答</span>
               </a>
             </el-col>
+            <el-col :span="6"  >
+
+              <div style="display: flex">
+                <el-input
+                    v-model="keyword"
+                    placeholder="请输入关键词"
+                >
+                </el-input>
+                <el-button  type="danger" plain @click="searchQuestion" > 搜索 </el-button>
+              </div>
+
+            </el-col>
             <el-divider style="margin-top: 0px"></el-divider>
           </el-row>
         </div>
@@ -41,7 +53,7 @@
                     <el-row>
                       <el-col :span="20">
                         <h2>
-                        <a @click="goToQuestion(item.id)">{{ item.title }}</a>
+                          <a @click="goToQuestion(item.id)" v-html="item.highlightTitle || item.title"></a>
 
                         </h2>
                       </el-col>
@@ -114,7 +126,7 @@
 
 <script setup lang="ts">
 import { ref,onMounted } from "vue";
-import {type Question, getQuestions} from "@/api/questions"
+import {type Question, getQuestions,getSearchQuestions} from "@/api/questions";
 import {useRouter} from "vue-router";
 
 const router = useRouter()
@@ -150,12 +162,31 @@ const selectType = (id: number) =>{
 }
 
 
+const keyword = ref('')
+const page = ref(1)
+const size = ref(5)
+const searchQuestion = async () => {
+  const data = await getSearchQuestions(keyword.value, page.value, size.value);
+  console.log("data:", data);
+  questions.value = data;
+  newQuestions.value = questions.value.sort((a, b) => b.postTime - a.postTime)
+  selectType(1)
+}
+
+
 
 
 
 </script>
 
 <style scoped>
+
+::v-deep .em {
+  color: #fb7a75;
+  font-weight: bold;
+  font-style: italic; /* 字体倾斜 */
+}
+
 .container {
   margin: 20px;
 }

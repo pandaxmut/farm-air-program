@@ -31,7 +31,7 @@ public class FilesService {
 //...生成上传凭证，然后准备上传
         String accessKey = "wcX5fhAyi3sZpAE4-nrshjLslZccuMKVtUKSzOmc";
         String secretKey = "lkla5xhjTuY2Zma_D18Gecbnn_HE5B7E2dnwJklR";
-        String bucket = "farmairprogram";
+        String bucket = "farmairprogram1";
 
 //默认不指定key的情况下，以文件内容的hash值作为文件名
         String key = null;
@@ -83,7 +83,7 @@ public class FilesService {
 
     public String downloadFile(String key) throws UnsupportedEncodingException {
         String fileName = key;
-        String domainOfBucket = "http://sqnikww4k.hn-bkt.clouddn.com";
+        String domainOfBucket = "http://ssqsismum.hn-bkt.clouddn.com";
         String encodedFileName = URLEncoder.encode(fileName, "utf-8").replace("+", "%20");
         String publicUrl = String.format("%s/%s", domainOfBucket, encodedFileName);
         String accessKey = "wcX5fhAyi3sZpAE4-nrshjLslZccuMKVtUKSzOmc";

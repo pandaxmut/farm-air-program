@@ -77,7 +77,25 @@ const router = createRouter({
         //关于系统
         { path: 'about',component: () => import('@/views/AboutView.vue') },
         //mall
-        { path: 'mall',component: () => import('@/views/mall.vue') },
+        { path: 'mall',
+          children: [
+            //商城
+            {
+              path: '',
+              name: 'MallView',
+              component: () => import('@/views/mall/mall.vue'),
+              props: true  // 允许将路由参数作为 props 传递给组件
+            },
+            //创建商品
+            { path: 'create',
+              component: () => import('@/views/mall/CreateProductsView.vue')
+            },
+            //商品详情
+            { path: ':id',
+             name: 'MallDetailView',
+            }
+          ]
+        },
         //news
         { path: 'news',component: () => import('@/views/news.vue') },
         // articles

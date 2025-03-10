@@ -15,8 +15,10 @@ public enum ResponseEnum {
     TOKENEXPIRED(402,"token过期"),
     TOKENERROR(403,"refresh token错误"),
     NOT_FOUND(404,"not found"),
-    METHOD_NOT_ALLOWED(405,"method not allowed");
+    METHOD_NOT_ALLOWED(405,"method not allowed"),
 
+    //业务异常
+    MULTIPLE(50001,"重复插入" );
 
     private final Integer code;
     private final String message;

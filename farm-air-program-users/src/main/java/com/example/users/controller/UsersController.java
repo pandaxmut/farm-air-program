@@ -131,7 +131,8 @@ public class UsersController {
     }
 
 
-    //刷新token,此处的token为本地token
+    //使用refreshToken请求accessToken,
+    //TODO 如何需要校验用户是否登录、强制下线用户的话，就需要将token保存到redis中。
     @PostMapping("refreshToken")
     public CommonResult<String> refreshToken(HttpServletRequest request){
         //全局拦截器已经将header中的authorization用户信息提取了
